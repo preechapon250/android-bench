@@ -9,17 +9,13 @@ the task. We are sharing this dataset to (a) give Android developers a view into
 how well current products perform on Android tasks, and (b) help agent and LLM
 developers to improve their products for Android.
 
-The public release of Android Bench includes the official website, a
-methodology document, a blog post, and a GitHub repository containing the
-dataset and evaluation harness.
-
 ## Summary of Results
 
 ![pass@1 Results](./assets/results.png) pass@1
 
-| ⚠️  Warning |
-| :---- |
-| Note: GPT 5.2 Codex was run with reasoning level high (and not xhigh). Codex at xhigh does not complete the benchmark in 2 days. |
+> ⚠️ We ran GPT 5.2-Codex with reasoning level `high` (instead of `xhigh`)
+> when we made this report. We continuously update the report and models
+> as we release benchmark updates.
 
 The latest models - Gemini 3.1 Pro and Claude Opus 4.6 - top the leaderboard.
 Note however that the 95% confidence intervals overlap across many models. So
@@ -33,9 +29,9 @@ additional Android specific capabilities:
 
 *   Focuses on Kotlin language and Android APIs as opposed to Python.
 *   Requires understanding and use of the gradle build system.
-*   Multi-modal: *20* tasks include screenshots that need to be understood in
-    order to complete the task. (Future editions will include videos
-    demonstrating issues with animations).
+*   Multi-modal: *20* tasks include screenshots models must understand to
+    complete the task. (We're working on including videos demonstrating issues
+    with animations).
 *   Heavily exercise Android’s ever evolving API landscape: All the tasks
     require knowledge of some area of Android.
 *   Android projects tend to be much larger, spanning multiple code files and
@@ -48,10 +44,8 @@ additional Android specific capabilities:
 See the Android Bench Methodology for a detailed description on the task acquisition pipeline.
 At a high level, there are two sources of tasks:
 
-*   12 tasks are entirely new tasks manually written by Android domain experts,
-    specifically targeting critical areas of Android that were not represented
-    in the GitHub data.
-*   The remaining 88 tasks are collected from existing PRs on GitHub.
+*   Android domain experts manually wrote 12 entirely new tasks, specifically targeting critical areas of Android underreprsented in the GitHub data.
+*   We collected the remaining 88 tasks from existing PRs on GitHub.
 
 The GitHub data collection process undergoes a stringent review pipeline:
 
@@ -59,23 +53,19 @@ The GitHub data collection process undergoes a stringent review pipeline:
 (stars used as an approximation of popularity/quality), and only include changes
 from the last 3 years.
 
-2. These tasks are then vetted by our team to validate that the test coverage of
-the task is reasonable.
+2. Our team then vets these tasks to validate that the test coverage of the task
+is reasonable.
 
-3. It is then further vetted by a team of engineers who are proficient in
-Android app development to check whether the task description is clear, and
-whether the tests are correctly specified.
+3. A team of engineers proficient in Android app development then further vets the task to check whether its description is clear, and whether the tests are
+correctly specified.
 
 ### Dataset Composition
 
-We measure the task difficulty by the number of lines of change that were
-required in the human authored patch. Android Bench includes 29 tasks that
-require at least more than 100 lines to be changed.
+We measure the task difficulty by the number of lines of change that the human-authored patch required. Android Bench includes 29 tasks that require changes of at least 100 lines.
 
 ![LOC Distribution](./assets/composition_loc.png)
 
-Tasks are sourced from 33 repositories. The repositories that contribute the
-most tasks are:
+We sourced tasks from 33 repositories. The repositories that contributed the most tasks are:
 
 | repository | count |
 | :---- | :---- |
@@ -90,7 +80,7 @@ most tasks are:
 | googlemaps/android-maps-compose | 4 |
 | element-hq/element-x-android | 3 |
 
-Tasks were picked to cover a variety of domains in Android APIs. The following
+We picked tasks to cover a variety of domains in Android APIs. The following
 chart shows the distribution of the various domains.
 
 ![Domains Represented](./assets/composition_categories.png)
@@ -101,9 +91,7 @@ We can also categorize the dataset by the type of task.
 
 ### Contamination risk
 
-The current datasetn is comprised of tasks that are newly created, and tasks that
-are minimally modified from what is present on GitHub. The current distribution
-looks like this:
+The current dataset comprises newly created tasks and tasks that are minimally modified from what is present on GitHub. The current distribution looks like this:
 
 | category | count |
 | :---- | :---- |
@@ -111,40 +99,30 @@ looks like this:
 | Non Permissive Licenses (GPL, AGPL) | 27 |
 | New Task | 12 |
 
-There is a real possibility that LLMs are trained on GitHub data from
-permissively licensed projects, so there is a definite risk of contamination.
-Future editions of Android Bench will attempt to reduce the chances of this by
-utilizing some of the following techniques:
+LLMs might train on GitHub data from permissively licensed projects, which creates a risk of contamination.
 
-*   Increasing the proportion of newly created tasks that are not present on
-    GitHub.
-*   Not open sourcing the dataset on GitHub (e.g. providing the dataset only on
-    HuggingFace, or by keeping the dataset private and only allowing runs via
-    Kaggle)
+While we haven't settled on a definitive strategy, future editions of Android Bench may attempt to reduce the chances of this through some of the following techniques:
+
+*   Increasing the proportion of newly created tasks that are not present on GitHub.
+*   Not open sourcing the dataset on GitHub (for example, providing the dataset only on HuggingFace, or by keeping the dataset private and only allowing runs via Kaggle)
 
 As of right now, the results do not seem to vary significantly between the
 permissive and non permissive projects.
 
 ## Experimental Methodology
 
-In the first release of the benchmark, we use a single agent harness, and
-benchmark multiple models. The agent harness is a simple shell agent that has
-been proven to work well on SWE-bench. We mainly target the latest versions of
-the models from Anthropic, Google and OpenAI.
+In the first release of the benchmark, we use a single agent harness, and benchmark multiple models. The agent harness is a simple shell agent that proves effective on SWE-bench. We mainly target the latest versions of the models from Anthropic, Google and OpenAI.
 
-We run the benchmark 5 times on each model, and report pass@1 metric, with CI
-calculated using the bootstrap method. We set a limit of **10.0 dollars** for the
-inference cost and **250 turns** for the number of turns utilized to solve a single task.
+We run the benchmark 10 times on each model and report the pass@1 metric, calculating CI using the bootstrap method. We set a limit of **10.0 dollars** for the inference cost and **250 turns** for the number of turns to solve a single
+task.
 
 ### Agent Harness
 
 Android Bench uses [mini-swe-agent
 v1](https://GitHub.com/SWE-agent/mini-swe-agent) as its agent harness. This is a
-simple shell agent used in [SWE-Bench](https://www.swebench.com/). It performs
-well on SWE-bench, with Gemini 3 Pro scoring 75% on SWE-bench verified with this
-agent according to their website.
+simple shell agent that SWE-Bench uses. It performs well on SWE-bench; according to their website, Gemini 3 Pro scores 75% on SWE-bench when using this agent.
 
-The system instruction is slightly customized to indicate that the agent is
+We slightly customize the system instruction to indicate that the agent is
 solving an Android related task:
 
 ```text
@@ -211,24 +189,19 @@ harnesses including gemini-cli, Android Studio’s agent, Claude Code, and Codex
 
 ### Detailed Results
 
-The following table breaks down model performance across different subsets of
-the dataset. Since the overall dataset contains only 100 tasks, variance of
-really fine grained subsets isn’t very interesting to see.
+The following table breaks down model performance across different subsets of the dataset. Since the overall dataset contains only 100 tasks, variance of really fine grained subsets offers little insight.
 
-Instead, we look at the dataset split by a few categories and their negations. 
+Instead, we split the dataset by a few categories and their negations.
 In particular, we look at the following subsets:
 
-*   Compose vs non Compose. Compose is the current UI toolkit library used in
-    Android apps.
-*   Library vs Application: 41 tasks come from GitHub projects that are
-    considered as libraries to be utilized in other apps. The other 59 tasks
-    correspond to apps in various categories.
-*   Bugfix vs others (e.g. feature requests).
+*   Compose vs non Compose. Compose is the current UI toolkit library that Android apps use.
+*   Library vs Application: 41 tasks come from GitHub projects that we consider as libraries for use in other apps. The other 59 tasks correspond to apps in various categories.
+*   Bugfix vs others (for example, feature requests).
 *   Permissive licenses (potentially contaminated) vs non permissively licensed.
 
-The following table shows the pass rate and the 95% CI bounds for each of these
-categories for all the models. The graphs below show a visual representation of
-the same data.
+The following table shows the pass rate and the 95% CI bounds for each of
+these categories for all the models. The graphs below show a visual
+representation of the same data.
 
 | model\_name | Overall (100) | Compose (54) | Not Compose (46) | Library (41) | Not Library (59) | Bugfix (62) | Not Bugfix (38) | Permissive/Unknown License (61) | Non-Permissive License/New Task (39) |
 | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
@@ -258,7 +231,7 @@ longer than the overall CI width for a given model.
 
 Patch size is not a perfect measure of task difficulty, but the following is a
 scatter plot that shows how often a model solves a specific test. On the x axis,
-we have tasks sorted by the size of their original patch.
+we sort tasks by the size of their original patch.
 
 ![Tasks by model scatter plot](./assets/model_vs_difficulty.png)
 
@@ -268,8 +241,7 @@ we have tasks sorted by the size of their original patch.
 
 Our results show Flash 3.0 underperforming compared with other coding
 benchmarks, we performed trajectory analysis to determine possible reasons why.
-Based on the analysis of the 16 tasks from the nowinandroid repository across
-all models, here are the common patterns and divergences identified.
+Based on the analysis of the 16 tasks from the nowinandroid repository across all models, here are the common patterns and divergences we identified.
 
 ##### The `sed` Loop (Tooling Deficit)
 
@@ -309,12 +281,9 @@ attempting to fix “Unresolved reference” errors by adding new sed commands.
 
 ## Appendix: Run Statistics
 
-All the data in this report was generated from the following benchmark runs. The
-dataset was run multiple times for each model (see num\_runs column in the
-table).
+The following benchmark runs generated all the data in this report. We ran the dataset multiple times for each model (see the `num_runs` column in the table).
 
-> Note: Currently the numbers are less than 100 because a few tasks have been
-changed after review and their results are not included.
+> Note: Currently, the numbers are less than 100 because we changed a few tasks after review, and we do not include their results.
 
 | model\_name | num\_runs | avg\_tasks |
 | :---- | :---- | :---- |
@@ -335,18 +304,18 @@ changed after review and their results are not included.
 
 The pass@1 metric measures the probability that a single generated solution to a
 problem will successfully pass all associated unit tests. It acts as an unbiased
-estimator of the model’s “first-try success rate.” The pass@1 metric is
-calculated as the number of problems that pass all unit tests divided by the
-total number of problems. The benchmark was run for a minimum of 5 runs per
-model. For a specific problem, if a model generates n total solutions and c of
-those solutions pass the tests, the probability of success for that problem is
-calculated as:
+estimator of the model’s “first-try success rate.” We calculate the pass@1
+metric as the number of problems that pass all unit tests divided by the total
+number of problems. We ran the benchmark for a minimum of 5 runs per model. For
+a specific problem, if a model generates n total solutions and c of those
+solutions pass the tests, we calculate the probability of success for that
+problem as:
 
 ![pass@1 = c / n](./assets/pass@1.png)
 
 ### 95% Confidence Interval via Hierarchical Bootstrapping
 
-The 95% CI intervals were computed by using the following algorithm:
+We computed the 95% CI intervals by using the following algorithm:
 
 1.  Randomly sample (with replacement) 100 problems from the dataset
 2.  For each drawn problem, bring along all of its original n results.
@@ -375,13 +344,13 @@ both tasks and runs. By sampling tasks with replacement and then sampling runs
 within those tasks, we captured the full spectrum of uncertainty. Run-Only
 Variance Bootstrap: We fixed the set of tasks and only resampled the runs. This
 isolated the ‘noise’—the variance specifically caused by model inconsistency
-across identical inputs. While most models show that their performance variance
-is dictated by the specific tasks assigned, Gemini 3 Flash is a notable outlier.
-A much larger portion of its variance is explained by the runs, indicating that
-its performance fluctuations are driven by inherent run instability. This
-suggests that while other models are consistently challenged by specific tasks,
-Gemini 3 Flash’s results are significantly more susceptible to stochastic
-‘noise’ or inconsistent execution across identical prompts.
+across identical inputs. While most models show that the specific tasks assigned
+dictate their performance variance, Gemini 3 Flash is a notable outlier. The
+runs explain a much larger portion of its variance, indicating that inherent run
+instability drives its performance fluctuations. This suggests that while
+specific tasks consistently challenge other models, Gemini 3 Flash’s results
+are significantly more susceptible to stochastic ‘noise’ or inconsistent
+execution across identical prompts.
 
 ### Power Analysis
 
@@ -394,7 +363,7 @@ should add more tasks.
 
 ### Stability Score
 
-Stability is quantified by the formula ![S=(P−F)/n](./assets/stability.png), where S ∈ [0,1]. This metric
+We quantify stability by the formula ![S=(P−F)/n](./assets/stability.png), where S ∈ [0,1]. This metric
 captures the degree of consensus across multiple trials of the same task. Our
 current benchmark average of 0.85 reflects a generally stable performance across
 the suite. However, because this metric is highly sensitive to outliers in small
@@ -423,52 +392,52 @@ Relatively simple sounding error that to fix requires migrating a Room database
 *   https://GitHub.com/you-apps/ClockYou/pull/292
 *   Description:
 
-\# 282: App crashes after adding two cities with the same name \#\#\# Steps to
+# 282: App crashes after adding two cities with the same name ### Steps to
 reproduce
 
 Add two cities with the same name to the world clock (e.g., Abidjan/Burkina Faso
 and Abidjan/Bouvet Island)
 
-\#\#\# Expected behavior
+### Expected behavior
 
 Two cities are added to the world clock.
 
-\#\#\# Actual behavior
+### Actual behavior
 
 The app crashes.
 
-\#\#\# Clock You version
+### Clock You version
 
 7.0
 
-\#\#\# Android version
+### Android version
 
 Android 13
 
-\#\#\# Other details
+### Other details
 
-\#\#\# Acknowledgements
+### Acknowledgements
 
-\- \[X\] I have searched the existing issues and this is a new ticket,
-\*\*NOT\*\* a duplicate or related to another open issue. \- \[X\] I have
-written a short but informative title. \- \[X\] I will fill out all of the
+- [X] I have searched the existing issues and this is a new ticket,
+**NOT** a duplicate or related to another open issue. - [X] I have
+written a short but informative title. - [X] I will fill out all of the
 requested information in this form.
 ```
 
 ### Android\_snippets\_1
 ```text
 Project starts in a state that doesn’t build Simple sounding update cascades
-into multiple version upgrades. JDK, AGP, Kotlin, KSP and Hilt. \# \[Snippets\]
+into multiple version upgrades. JDK, AGP, Kotlin, KSP and Hilt. # [Snippets]
 Upgrade to JDK 25 and Kotlin 2.3.0
 
-\#\# Description When using JDK 25 to build the project, the project fails to
+## Description When using JDK 25 to build the project, the project fails to
 build. In order to support this we will also have to upgrade to Kotlin 2.3.0
 ```
 ### LemmyNet\_\_jerboa-pr\_1485
 ```text
 Migrate to Compose BOM
-https://developer.android.com/develop/ui/compose/setup\#using-the-bom \# 1484:
+https://developer.android.com/develop/ui/compose/setup#using-the-bom # 1484:
 Migrate to Compose BOM
 
-https://developer.android.com/develop/ui/compose/setup\#using-the-bom
+https://developer.android.com/develop/ui/compose/setup#using-the-bom
 ```
